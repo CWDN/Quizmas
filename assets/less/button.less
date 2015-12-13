@@ -10,9 +10,18 @@
   text-transform: uppercase;
   font-family: 'Roboto', sans-serif;
   text-align: center;
-  margin: 0 auto;
   display: block;
   margin-bottom: 5px;
+  min-width: 180px;
+  width: 100%;
+
+  @media screen and (min-width: 768px) {
+    width: auto;
+  }
+}
+
+.button-center {
+  margin: 0 auto;
 }
 
 .button:hover {
