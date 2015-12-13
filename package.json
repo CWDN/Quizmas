@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "migrate": "node migrate",
-    "migrate:up": "node migrate",
+    "migrate": "node migrate up",
+    "migrate:up": "node migrate up",
     "migrate:down": "node migrate down",
     "migrate:refresh": "node migrate refresh",
     "migrate:create": "node ./node_modules/migrate/bin/migrate create"
