@@ -1,0 +1,14 @@
+{
+  "ecmaVersion": 5,
+  "loadEagerly": [
+    "*.js"
+  ],
+  "plugins": {
+    "complete_strings": {},
+    "node": {},
+    "doc_comment": {
+      "fullDocs": true
+    },
+    "node-express": {}
+  }
+}

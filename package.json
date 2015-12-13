@@ -1,0 +1,22 @@
+{
+  "name": "quizmas",
+  "version": "1.0.0",
+  "description": "Websockets quiz",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@git.chrissquared.co.uk:christmas/Quizmas.git"
+  },
+  "author": "Chris Normansell, Chris Stroud",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3",
+    "express-handlebars": "^2.0.1",
+    "gulp": "^3.9.0",
+    "socket.io": "^1.3.7"
+  }
+}
