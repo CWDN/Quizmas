@@ -1,8 +1,10 @@
 var migrate = require('migrate');
 var set = migrate.load('migrations/.migrate', 'migrations');
-var args = process.argv.slice(2, 3);
+var args = process.argv.slice(2, 4);
+var migrateOption = '';
+
 if (typeof args[0] !== 'undefined') {
-  var migrateOption = args[0];
+  migrateOption = args[0];
   if (migrateOption === 'down') {
     down();
   } else if (migrateOption === 'refresh') {
@@ -19,6 +21,7 @@ function up () {
     if (err) throw err;
 
     console.log('Migration completed');
+    seed();
   });
 }
 
@@ -32,4 +35,12 @@ function down (callback) {
       callback();
     }
   });
+}
+
+function seed () {
+  if (typeof args[1] !== 'undefined' &&
+    args[1] === 'seed'
+  ) {
+    require(__dirname + '/database/seeders/QuestionSeeder');
+  }
 }
