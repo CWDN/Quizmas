@@ -1,0 +1,29 @@
+@primary-color: #16a085;
+
+.button  {
+  padding: 20px 60px;
+  background-color: @primary-color;
+  text-decoration: none;
+  color: #fff;
+  display: inline-block;
+  border: none;
+  text-transform: uppercase;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  display: block;
+  margin-bottom: 5px;
+  min-width: 180px;
+  width: 100%;
+
+  @media screen and (min-width: 768px) {
+    width: auto;
+  }
+}
+
+.button-center {
+  margin: 0 auto;
+}
+
+.button:hover {
+  background-color: lighten(@primary-color, 10%);
+}
