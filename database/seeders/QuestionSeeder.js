@@ -1,7 +1,7 @@
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database('database/quiz.sqlite');
 var fs = require('fs');
-
+console.log('Seeding questions');
 
 db.serialize(function () {
   db.run('begin transaction');
