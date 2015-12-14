@@ -1,7 +1,8 @@
 {
   "ecmaVersion": 5,
   "loadEagerly": [
-    "*.js"
+    "controllers/*.js",
+    "database/models/*.js"
   ],
   "plugins": {
     "complete_strings": {},
