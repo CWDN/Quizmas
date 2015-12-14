@@ -12,10 +12,19 @@ function Lobby (game) {
           team.setSocketId(socket.id);
           team.save();
         });
+        socket.broadcast.emit('new-team', {
+          team: data.team
+        });
       });
 
       socket.on('disconnect', function () {
         Team.getBySocketId(socket.id, function (team) {
+          if (team === undefined) {
+            return;
+          }
+          socket.broadcast.emit('remove-team', {
+            team: team.getName()
+          });
           team.delete();
         });
       });
