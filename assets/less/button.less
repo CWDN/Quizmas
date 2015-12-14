@@ -7,16 +7,26 @@
   color: #fff;
   display: inline-block;
   border: none;
-  text-transform: uppercase;
   font-family: 'Roboto', sans-serif;
   text-align: center;
-  display: block;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   min-width: 180px;
   width: 100%;
+  font-weight: bold;
+  font-size: 1.3em;
 
   @media screen and (min-width: 768px) {
     width: auto;
+  }
+}
+
+a.button {
+
+  &:hover,
+  &:active,
+  &:focus {
+    text-decoration: none;
+    color: #fff;
   }
 }
 
@@ -26,4 +36,12 @@
 
 .button:hover {
   background-color: lighten(@primary-color, 10%);
+}
+
+.button-danger {
+  background-color: #D28605;
+}
+
+.button-danger:hover {
+  background-color: lighten(#D28605, 10%);
 }
