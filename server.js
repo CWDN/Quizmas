@@ -6,6 +6,9 @@ var hbs = exphs.create({
   defaultLayout: 'master'
 });
 var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+exports.io = io;
 
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
@@ -15,7 +18,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(require('./controllers'));
 
 var ipAddress = require('./helpers/IpFinder')();
-app.listen(3000, function () {
+server.listen(3000, function () {
   console.log('Listening on port 3000...');
   console.log('Local Network IP: ' + ipAddress);
 });
