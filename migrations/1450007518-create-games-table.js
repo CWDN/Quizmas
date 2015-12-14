@@ -3,7 +3,7 @@
 exports.up = function (next) {
   var db = getDBConnection();
   db.serialize(function () {
-    db.run('CREATE TABLE lobby (name TEXT)');
+    db.run('CREATE TABLE games (name TEXT)');
   });
   db.close(function () {
     next();
@@ -13,7 +13,7 @@ exports.up = function (next) {
 exports.down = function (next) {
   var db = getDBConnection();
   db.serialize(function () {
-    db.run('DROP TABLE IF EXISTS lobby');
+    db.run('DROP TABLE IF EXISTS games');
   });
   db.close(function () {
     next();
