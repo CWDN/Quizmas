@@ -13,4 +13,11 @@ $(document).ready(function () {
       }
     }, 1000);
   });
+
+  console.log('GAME:' + game);
+  var Socket = io.connect(location.origin + '/' + game, {path: '/socket.io'});
+  Socket.emit('join', {
+    game: game,
+    team: teamName
+  });
 });
