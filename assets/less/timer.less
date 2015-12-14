@@ -1,0 +1,28 @@
+.bar {
+  height: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.timer {
+  background: #1B9AF7;
+  height: 100%;
+  width: 0%;
+}
+
+.animating {
+  animation: progress 30s linear;
+}
+
+@keyframes progress {
+  0% {
+    width: 100%;
+  }
+  50% {
+    background-color: #f39c12;
+  }
+  100% {
+    background-color: #c0392b;
+    width: 0%;
+  }
+}
