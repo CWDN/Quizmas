@@ -16,8 +16,24 @@ $(document).ready(function () {
 
   console.log('GAME:' + game);
   var Socket = io.connect(location.origin + '/' + game, {path: '/socket.io'});
-  Socket.emit('join', {
-    game: game,
-    team: teamName
+  if (typeof teamName !== "undefined") {
+    Socket.emit('join', {
+      game: game,
+      team: teamName
+    });
+  }
+
+  Socket.on('new-team', function (data) {
+    var team = data.team;
+    $('.player-list').append('<li>' + team + '</li>');
+  });
+
+  Socket.on('remove-team', function (data) {
+    var team = data.team;
+    $('.player-list li').each(function () {
+      if (team === $(this).html().trim()) {
+        $(this).remove();
+      }
+    });
   });
 });
