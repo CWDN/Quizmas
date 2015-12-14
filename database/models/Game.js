@@ -58,12 +58,22 @@ Game.prototype.create = function () {
  * @param  {Object} object
  * @return {Game}
  */
-Game.prototype.importFromObject = function (object) {
+Game.prototype.importFromObject = function (object, callback) {
+  if (object === undefined) {
+    callback(object);
+    return;
+  }
+
   if (object.name !== undefined) {
     this.setName(object.name);
-    this.teams = Team.getByGame(this.getName());
+    var game = this;
+    Team.getByGame(this.getName(), function (teams) {
+      game.teams = teams;
+      if (callback !== undefined) {
+        callback(game);
+      }
+    });
   }
-  return this;
 };
 
 /**
@@ -71,10 +81,9 @@ Game.prototype.importFromObject = function (object) {
  * @param  {string} name
  * @return {Game|undefined}
  */
-Game.getByName = function (name) {
+Game.getByName = function (name, callback) {
   var db = getDBConnection();
   var result;
-  var sync = true;
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM games WHERE name=?');
     stmt.run(name);
@@ -83,21 +92,17 @@ Game.getByName = function (name) {
       result = res;
     });
     stmt.finalize(function () {
-      sync = false;
       db.close();
+      if (result.length > 0) {
+        result = result.pop();
+      } else {
+        callback(undefined);
+        return;
+      }
+      var game = new Game();
+      game.importFromObject(result, callback);
     });
   });
-  while(sync) {
-    require('deasync').sleep(100);
-  }
-  if (result.length > 0) {
-    result = result.pop();
-  } else {
-    return undefined;
-  }
-  var game = new Game();
-  game.importFromObject(result);
-  return game;
 };
 
 /**

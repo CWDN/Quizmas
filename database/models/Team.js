@@ -1,4 +1,5 @@
 var sqlite3 = require('sqlite3').verbose();
+var databaseConnection;
 
 /**
  * Constructor.
@@ -97,12 +98,12 @@ Team.prototype.delete = function () {
   var db = getDBConnection();
   var team = this;
   db.serialize(function () {
-    console.log(team.getName(), team.getGame(), team.getSocketId());
-    var stmt = db.prepare('DELETE FROM teams WHERE name=?;');
-    stmt.run(team.getName());
-    stmt.finalize(function () {
-      console.log('done');
-    });
+    var stmt = db.prepare('DELETE FROM teams WHERE name=? AND game=? AND socketId=?;');
+    stmt.run([
+      team.getName(),
+      team.getGame(),
+      team.getSocketId()
+    ]);
   });
 };
 
@@ -124,10 +125,9 @@ Team.createFromObject = function (object) {
   return team;
 };
 
-Team.getByGame = function (game) {
+Team.getByGame = function (game, callback) {
   var db = getDBConnection();
   var result;
-  var sync = true;
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM teams WHERE game=?');
     stmt.run(game);
@@ -136,85 +136,64 @@ Team.getByGame = function (game) {
       result = res;
     });
     stmt.finalize(function () {
-      sync = false;
       db.close();
+      if (result.length === 0) {
+        return callback([]);
+      }
+
+      var teamObjects = result.map(function (item) {
+        var team = new Team();
+        return team.importFromObject(item);
+      });
+      return callback(teamObjects);
     });
   });
-  while(sync) {
-    require('deasync').sleep(100);
-  }
-  if (result.length === 0) {
-    return [];
-  }
-
-  var teamObjects = result.map(function (item) {
-    var team = new Team();
-    return team.importFromObject(item);
-  });
-
-  return teamObjects;
 };
 
-Team.getByTeamAndGame = function (teamName, game) {
+Team.getByTeamAndGame = function (teamName, game, callback) {
   var db = getDBConnection();
   var result;
-  var sync = true;
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM teams WHERE game=? AND name=?');
     stmt.run([game, teamName]);
     stmt.all(function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
-      sync = false;
       db.close();
+
+      var team = new Team();
+      team = team.importFromObject(result.pop());
+      return callback(team);
     });
   });
-  while(sync) {
-    require('deasync').sleep(100);
-  }
-  if (result.length > 0) {
-    var item = result.pop();
-  } else {
-    return undefined;
-  }
-
-  var team = new Team();
-  return team.importFromObject(item);
-
-  return team;
 };
 
-Team.getBySocketId = function (socketId) {
+Team.getBySocketId = function (socketId, callback) {
   var db = getDBConnection();
-  var result;
-  var sync = true;
+  var result = [];
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM teams WHERE socketId=?');
-    stmt.run(socketId);
-    stmt.all(function (err, res) {
-      if (err) throw err;
+    stmt.all([socketId], function (err, res) {
+      if (err) {
+        console.log(err);
+      }
       result = res;
-    });
-    stmt.finalize(function () {
-      sync = false;
+      done = true;
       db.close();
     });
+
+    stmt.finalize(function () {
+      var team = new Team();
+      team = team.importFromObject(result.pop());
+      if (callback !== undefined) {
+        return callback(team);
+      }
+    });
   });
-  while(sync) {
-    require('deasync').sleep(100);
-  }
-  if (result.length > 0) {
-    var item = result.pop();
-  } else {
-    return undefined;
-  }
-
-  var team = new Team();
-  return team.importFromObject(item);
-
-  return team;
 };
 
 /**
