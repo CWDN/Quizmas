@@ -80,7 +80,7 @@ Team.prototype.save = function () {
   var db = getDBConnection();
   var team = this;
   db.serialize(function () {
-    var stmt = db.prepare('UPDATE teams SET team=?, socketId=?, game=? WHERE team=?');
+    var stmt = db.prepare('UPDATE teams SET name=?, socketId=?, game=? WHERE name=?');
     stmt.run([
       team.getName(),
       team.getSocketId(),
@@ -89,6 +89,19 @@ Team.prototype.save = function () {
     ]);
     stmt.finalize(function () {
       db.close();
+    });
+  });
+};
+
+Team.prototype.delete = function () {
+  var db = getDBConnection();
+  var team = this;
+  db.serialize(function () {
+    console.log(team.getName(), team.getGame(), team.getSocketId());
+    var stmt = db.prepare('DELETE FROM teams WHERE name=?;');
+    stmt.run(team.getName());
+    stmt.finalize(function () {
+      console.log('done');
     });
   });
 };
@@ -140,6 +153,68 @@ Team.getByGame = function (game) {
   });
 
   return teamObjects;
+};
+
+Team.getByTeamAndGame = function (teamName, game) {
+  var db = getDBConnection();
+  var result;
+  var sync = true;
+  db.serialize(function () {
+    var stmt = db.prepare('SELECT * FROM teams WHERE game=? AND name=?');
+    stmt.run([game, teamName]);
+    stmt.all(function (err, res) {
+      if (err) throw err;
+      result = res;
+    });
+    stmt.finalize(function () {
+      sync = false;
+      db.close();
+    });
+  });
+  while(sync) {
+    require('deasync').sleep(100);
+  }
+  if (result.length > 0) {
+    var item = result.pop();
+  } else {
+    return undefined;
+  }
+
+  var team = new Team();
+  return team.importFromObject(item);
+
+  return team;
+};
+
+Team.getBySocketId = function (socketId) {
+  var db = getDBConnection();
+  var result;
+  var sync = true;
+  db.serialize(function () {
+    var stmt = db.prepare('SELECT * FROM teams WHERE socketId=?');
+    stmt.run(socketId);
+    stmt.all(function (err, res) {
+      if (err) throw err;
+      result = res;
+    });
+    stmt.finalize(function () {
+      sync = false;
+      db.close();
+    });
+  });
+  while(sync) {
+    require('deasync').sleep(100);
+  }
+  if (result.length > 0) {
+    var item = result.pop();
+  } else {
+    return undefined;
+  }
+
+  var team = new Team();
+  return team.importFromObject(item);
+
+  return team;
 };
 
 /**
