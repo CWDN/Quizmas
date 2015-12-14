@@ -8,14 +8,16 @@ function Lobby (game) {
     var nsp = io.of('/' + this.game.getName());
     nsp.on('connection', function (socket) {
       socket.on('join', function (data) {
-        var team = Team.getByTeamAndGame(data.team, data.game);
-        team.setSocketId(socket.id);
-        team.save();
+        Team.getByTeamAndGame(data.team, data.game, function (team) {
+          team.setSocketId(socket.id);
+          team.save();
+        });
       });
 
-      socket.on('disconnect', function (data) {
-        var team = Team.getBySocketId(socket.id);
-        team.delete();
+      socket.on('disconnect', function () {
+        Team.getBySocketId(socket.id, function (team) {
+          team.delete();
+        });
       });
     });
   };
