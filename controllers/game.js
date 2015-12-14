@@ -16,36 +16,56 @@ router.post('/create', function (req, res) {
 });
 
 router.post('/join', function (req, res) {
-  var game = Game.getByName(req.body.game);
-  if (game === undefined) {
-    return res.redirect('/');
-  }
-  return res.render('game/team-name', {game: game.getName()});
+  Game.getByName(req.body.game, function (game) {
+    if (game === undefined) {
+      res.redirect('/');
+      return;
+    }
+    res.render('game/team-name', {game: game.getName()}, function (err, html) {
+      if (err) {
+        console.log(err);
+      }
+      res.send(html);
+    });
+  });
 });
 
 router.post('/:game/lobby', function (req, res) {
-  var game = Game.getByName(req.params.game);
-  if (game === undefined) {
-    return res.redirect('/');
-  }
-  game.addTeam(req.body.teamName);
+  Game.getByName(req.params.game, function (game) {
+    if (game === undefined) {
+      res.redirect('/');
+      return;
+    }
+    game.addTeam(req.body.teamName);
 
-  return res.render('game/player-lobby', {
-    game: game.getName(),
-    teams: game.getTeams(),
-    currentTeam: req.body.teamName
+    res.render('game/player-lobby', {
+      game: game.getName(),
+      teams: game.getTeams(),
+      currentTeam: req.body.teamName
+    }, function (err, html) {
+      if (err) {
+        console.log(err);
+      }
+      res.send(html);
+    });
   });
 });
 
 router.get('/:game/lobby/presenter', function (req, res) {
-  var game = Game.getByName(req.params.game);
-  if (game === undefined) {
-    return res.redirect('/');
-  }
-
-  return res.render('game/presenter-lobby', {
-    game: game.getName(),
-    teams: game.getTeams()
+  Game.getByName(req.params.game, function (game) {
+    if (game === undefined) {
+      res.redirect('/');
+      return;
+    }
+    res.render('game/presenter-lobby', {
+      game: game.getName(),
+      teams: game.getTeams()
+    }, function (err, html) {
+      if (err) {
+        console.log(err);
+      }
+      res.send(html);
+    });
   });
 });
 
