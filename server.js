@@ -1,9 +1,13 @@
 var express = require('express');
 var exphs = require('express-handlebars');
 var bodyParser = require('body-parser');
+var hbs = exphs.create({
+  helpers: require('./helpers/handlebars/IfConditionals'),
+  defaultLayout: 'master'
+});
 var app = express();
 
-app.engine('handlebars', exphs({defaultLayout: 'master'}));
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
 app.use(express.static(__dirname + '/public'));
