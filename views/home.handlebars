@@ -18,10 +18,16 @@
 
   <div class="col-xs-12 col-sm-6">
     <h2>Create a game</h2>
-    <form>
+    <form action="/game/create" method="POST">
       <div class="form-group">
         <label for="game">Game Name</label>
-        <input type="text" class="form-control" id="create-game" placeholder="xmas2015">
+        <input
+          type="text"
+          class="form-control"
+          id="create-game"
+          placeholder="xmas2015"
+          name="game"
+        >
       </div>
       <button class="button">Create</button>
     </form>
