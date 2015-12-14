@@ -1,16 +1,31 @@
 var sqlite3 = require('sqlite3').verbose();
 
+/**
+ * Constructor.
+ */
 function Game () {
+  this.fromDatabase = false;
 }
 
+/**
+ * Gets the name of the game.
+ * @return {string}
+ */
 Game.prototype.getName = function () {
   return this.name;
 };
 
+/**
+ * Sets the name of the game.
+ * @param {string} name
+ */
 Game.prototype.setName = function (name) {
   this.name = name;
 };
 
+/**
+ * Stores the current game object into the database.
+ */
 Game.prototype.create = function () {
   var db = getDBConnection();
   var game = this;
@@ -18,8 +33,8 @@ Game.prototype.create = function () {
     var stmt = db.prepare('INSERT INTO games VALUES (?)');
     stmt.run(game.getName());
     stmt.finalize();
+    db.close();
   });
-  db.close();
 };
 
 /**
@@ -69,6 +84,10 @@ Game.getByName = function (name) {
   return game;
 };
 
+/**
+ * Gets the sqlite db.
+ * @return {sqlite.Database}
+ */
 function getDBConnection () {
   return new sqlite3.Database('database/quiz.sqlite');
 }
