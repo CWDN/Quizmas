@@ -1,10 +1,12 @@
 var sqlite3 = require('sqlite3').verbose();
+var Team = require('./Team');
 
 /**
  * Constructor.
  */
 function Game () {
-  this.fromDatabase = false;
+  this.teams = [];
+  this.name = '';
 }
 
 /**
@@ -23,6 +25,19 @@ Game.prototype.setName = function (name) {
   this.name = name;
 };
 
+Game.prototype.addTeam = function (teamName) {
+  var team = Team.createFromObject({
+    name: teamName,
+    socketId: '',
+    game: this.getName()
+  });
+  this.teams.push(team);
+};
+
+Game.prototype.getTeams = function () {
+  return this.teams;
+};
+
 /**
  * Stores the current game object into the database.
  */
@@ -31,9 +46,10 @@ Game.prototype.create = function () {
   var game = this;
   db.serialize(function () {
     var stmt = db.prepare('INSERT INTO games VALUES (?)');
-    stmt.run(game.getName());
-    stmt.finalize();
-    db.close();
+    stmt.run([game.getName()]);
+    stmt.finalize(function () {
+      db.close();
+    });
   });
 };
 
@@ -42,10 +58,10 @@ Game.prototype.create = function () {
  * @param  {Object} object
  * @return {Game}
  */
-Game.prototype.importFromDBObject = function (object) {
+Game.prototype.importFromObject = function (object) {
   if (object.name !== undefined) {
     this.setName(object.name);
-    this.fromDatabase = true;
+    this.teams = Team.getByGame(this.getName());
   }
   return this;
 };
@@ -80,7 +96,7 @@ Game.getByName = function (name) {
     return undefined;
   }
   var game = new Game();
-  game.importFromDBObject(result);
+  game.importFromObject(result);
   return game;
 };
 
