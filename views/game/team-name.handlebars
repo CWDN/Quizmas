@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="col-xs-12 col-sm-6">
+    <h2>Your team name</h2>
+    <form action="/game/{{game}}/lobby" method="POST">
+      <div class="form-group">
+        <label for="game">Team name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="join-game"
+          placeholder="Grumpy Caviar Troopers"
+          name="teamName"
+        >
+      </div>
+      <button class="button">Set</button>
+    </form>
+  </div>
+</div>

@@ -1,10 +1,12 @@
 var sqlite3 = require('sqlite3').verbose();
+var Team = require('./Team');
 
 /**
  * Constructor.
  */
 function Game () {
-  this.fromDatabase = false;
+  this.teams = [];
+  this.name = '';
 }
 
 /**
@@ -23,6 +25,19 @@ Game.prototype.setName = function (name) {
   this.name = name;
 };
 
+Game.prototype.addTeam = function (teamName) {
+  var team = Team.createFromObject({
+    name: teamName,
+    socketId: '',
+    game: this.getName()
+  });
+  this.teams.push(team);
+};
+
+Game.prototype.getTeams = function () {
+  return this.teams;
+};
+
 /**
  * Stores the current game object into the database.
  */
@@ -31,9 +46,10 @@ Game.prototype.create = function () {
   var game = this;
   db.serialize(function () {
     var stmt = db.prepare('INSERT INTO games VALUES (?)');
-    stmt.run(game.getName());
-    stmt.finalize();
-    db.close();
+    stmt.run([game.getName()]);
+    stmt.finalize(function () {
+      db.close();
+    });
   });
 };
 
@@ -42,12 +58,22 @@ Game.prototype.create = function () {
  * @param  {Object} object
  * @return {Game}
  */
-Game.prototype.importFromDBObject = function (object) {
+Game.prototype.importFromObject = function (object, callback) {
+  if (object === undefined) {
+    callback(object);
+    return;
+  }
+
   if (object.name !== undefined) {
     this.setName(object.name);
-    this.fromDatabase = true;
+    var game = this;
+    Team.getByGame(this.getName(), function (teams) {
+      game.teams = teams;
+      if (callback !== undefined) {
+        callback(game);
+      }
+    });
   }
-  return this;
 };
 
 /**
@@ -55,10 +81,9 @@ Game.prototype.importFromDBObject = function (object) {
  * @param  {string} name
  * @return {Game|undefined}
  */
-Game.getByName = function (name) {
+Game.getByName = function (name, callback) {
   var db = getDBConnection();
   var result;
-  var sync = true;
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM games WHERE name=?');
     stmt.run(name);
@@ -67,21 +92,17 @@ Game.getByName = function (name) {
       result = res;
     });
     stmt.finalize(function () {
-      sync = false;
       db.close();
+      if (result.length > 0) {
+        result = result.pop();
+      } else {
+        callback(undefined);
+        return;
+      }
+      var game = new Game();
+      game.importFromObject(result, callback);
     });
   });
-  while(sync) {
-    require('deasync').sleep(100);
-  }
-  if (result.length > 0) {
-    result = result.pop();
-  } else {
-    return undefined;
-  }
-  var game = new Game();
-  game.importFromDBObject(result);
-  return game;
 };
 
 /**

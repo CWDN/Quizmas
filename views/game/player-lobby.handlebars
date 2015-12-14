@@ -17,18 +17,21 @@
   <h3>Players</h3>
 
   <ul class="player-list">
-    <li>
-      Team one
-    </li>
-    <li class="highlighted">
-      Team two (you)
-    </li>
-    <li>
-      Team three
-    </li>
-    <li>
-      Team three
-    </li>
+    {{#each teams}}
+      {{#ifCond this.name '===' ../currentTeam}}
+        <li class="highlighted">
+          {{this.name}} (you)
+        </li>
+      {{else}}
+        <li>
+          {{this.name}}
+        </li>
+      {{/ifCond}}
+    {{/each}}
   </ul>
 
 </div>
+<script>
+  var teamName = "{{currentTeam}}";
+  var game = "{{game}}";
+</script>
