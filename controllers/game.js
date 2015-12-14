@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var Game = require('../database/models/Game');
+var Lobby = require('./lobby-ws');
 
 router.post('/create', function (req, res) {
   if (req.body.game === '') {
@@ -10,6 +11,7 @@ router.post('/create', function (req, res) {
   var game = new Game();
   game.setName(req.body.game);
   game.create();
+  new Lobby(game);
   return res.render('game/presenter-lobby', {game: game.getName()});
 });
 
