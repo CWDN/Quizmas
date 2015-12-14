@@ -10,17 +10,20 @@ router.post('/create', function (req, res) {
   var game = new Game();
   game.setName(req.body.game);
   game.create();
-  return res.render('game/create');
+  return res.render('game/lobby', {game: game.getName()});
 });
 
 router.post('/join', function (req, res) {
-  return res.render('home', {layout: false});
+  return res.redirect('/game/' + req.body.game + '/lobby');
 });
 
 router.get('/:game/lobby', function (req, res) {
-  console.log(req.params);
+  var game = Game.getByName(req.params.game);
+  if (game === undefined) {
+    return res.redirect('/');
+  }
 
-  return res.render('home', {layout: false});
+  return res.render('game/lobby', {game: game.getName()});
 });
 
 module.exports = router;
