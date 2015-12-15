@@ -1,19 +1,5 @@
 /* global $, game, io, location, teamName */
 $(document).ready(function () {
-  $('.next-question').click(function () {
-    $('.overlay').removeClass('hide');
-    var timeLeft = 3;
-    $('[data-countdown]').html(timeLeft + 's');
-    var intervalId = setInterval(function () {
-      timeLeft--;
-      $('[data-countdown]').html(timeLeft + 's');
-      if (timeLeft < 1) {
-        clearInterval(intervalId);
-        $('.overlay').addClass('hide');
-      }
-    }, 1000);
-  });
-
   console.log('GAME:' + game);
   var Socket = io.connect(location.origin + '/' + game, {path: '/socket.io'});
   if (typeof teamName !== 'undefined') {
@@ -24,7 +10,7 @@ $(document).ready(function () {
   }
 
   $('[data-quiz-event="start"]').click(function () {
-    Socket.emit('start');
+    Socket.emit('next-question');
   });
 
   Socket.on('new-team', function (data) {
@@ -41,7 +27,21 @@ $(document).ready(function () {
     });
   });
 
-  Socket.on('start', function (data) {
-    alert('The quiz has started!');
+  Socket.on('page', function (data) {
+    $('[data-container]').html(data.html);
+  });
+
+  $(document).on('click', '[data-send-answer]', function () {
+    var $selected = $('.answer input[type="radio"]:checked');
+    console.log($selected);
+    if (!$selected) {
+      alert('select something!');
+      return;
+    }
+
+    var answer = $selected.val();
+    Socket.emit('send-answer', {
+      answer: answer
+    });
   });
 });

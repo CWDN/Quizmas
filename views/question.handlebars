@@ -6,27 +6,14 @@
   <div class="timer animating"></div>
 </div>
 
-<div class="answer">
-  <input type="radio" id="radio1" name="answer" />
-  <label for="radio1">Answer One</label>
-</div>
+{{#each answers}}
+  <div class="answer">
+    <input type="radio" id="answer{{@index}}" name="answer" value="{{this}}" />
+    <label for="answer{{@index}}">{{this}}</label>
+  </div>
+{{/each}}
 
-<div class="answer">
-  <input type="radio" id="radio2" name="answer" />
-  <label for="radio2">Answer Two</label>
-</div>
-
-<div class="answer">
-  <input type="radio" id="radio3" name="answer" />
-  <label for="radio3">Answer One</label>
-</div>
-
-<div class="answer">
-  <input type="radio" id="radio4" name="answer" />
-  <label for="radio4">Answer Two</label>
-</div>
-
-<button class="button button-center next-question">Submit</button>
+<button class="button button-center" data-send-answer>Submit</button>
 
 <div class="overlay hide">
   <div class="center">
