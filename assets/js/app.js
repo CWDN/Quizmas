@@ -1,5 +1,5 @@
+/* global $, game, io, location, teamName */
 $(document).ready(function () {
-
   $('.next-question').click(function () {
     $('.overlay').removeClass('hide');
     var timeLeft = 3;
@@ -16,7 +16,7 @@ $(document).ready(function () {
 
   console.log('GAME:' + game);
   var Socket = io.connect(location.origin + '/' + game, {path: '/socket.io'});
-  if (typeof teamName !== "undefined") {
+  if (typeof teamName !== 'undefined') {
     Socket.emit('join', {
       game: game,
       team: teamName
