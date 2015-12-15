@@ -34,19 +34,15 @@ $(document).ready(function () {
   Socket.on('countdown-reduce', function (data) {
     var percentage = ((data.secondsLeft / data.totalSeconds) * 100) + '%';
     $('[data-timer]').css('width', percentage);
+    $('[data-countdown]').html(data.secondsLeft + 's');
   });
 
   $(document).on('click', '[data-send-answer]', function () {
     var $selected = $('.answer input[type="radio"]:checked');
-    console.log($selected);
-    if (!$selected) {
-      alert('select something!');
-      return;
-    }
-
     var answer = $selected.val();
     Socket.emit('send-answer', {
       answer: answer
     });
+    $('.overlay').removeClass('hide');
   });
 });
