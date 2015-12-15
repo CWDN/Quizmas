@@ -68,6 +68,18 @@ function Lobby (game) {
           nsp.emit('page', {
             html: html
           });
+          var totalSeconds = 30;
+          var secondsLeft = totalSeconds;
+          var intervalId = setInterval(function () {
+            secondsLeft--;
+            if (secondsLeft <= 0) {
+              clearInterval(intervalId)
+            }
+            nsp.emit('countdown-reduce', {
+              totalSeconds: totalSeconds,
+              secondsLeft: secondsLeft
+            });
+          }, 1000);
         });
       });
 

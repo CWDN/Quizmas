@@ -17,4 +17,25 @@
 .answer input[type="radio"]:checked + label {
     background-color: #1B9AF7;
     color: #fff;
+    padding-right: 90px;
+}
+
+.answer input[type="radio"]:checked ~ .button {
+  width: 110px;
+  padding: 0 10px;
+}
+
+.answer {
+  position: relative;
+  .button {
+    top: 0;
+    right: 0;
+    position: absolute;
+    height: 100%;
+    min-width: 0;
+    padding: 0;
+    width: 0;
+    box-sizing: border-box;
+    transition: width .4s;
+  }
 }

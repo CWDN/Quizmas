@@ -31,6 +31,11 @@ $(document).ready(function () {
     $('[data-container]').html(data.html);
   });
 
+  Socket.on('countdown-reduce', function (data) {
+    var percentage = ((data.secondsLeft / data.totalSeconds) * 100) + '%';
+    $('[data-timer]').css('width', percentage);
+  });
+
   $(document).on('click', '[data-send-answer]', function () {
     var $selected = $('.answer input[type="radio"]:checked');
     console.log($selected);
