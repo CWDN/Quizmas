@@ -2,12 +2,19 @@ var server = require('../server');
 var io = server.io;
 var app = server.app;
 var Team = require('../database/models/Team');
+var Quiz = require('../quiz');
 
 function Lobby (game) {
   this.game = game;
 
   this.startWebSockets = function () {
     var nsp = io.of('/' + this.game.getName());
+    var quiz = new Quiz(['General Knowledge'], {
+      hard: 5,
+      medium: 10,
+      easy: 15
+    }, this.game);
+    var game = this.game;
     nsp.on('connection', function (socket) {
       socket.on('join', function (data) {
         Team.getByTeamAndGame(data.team, data.game, function (team) {
@@ -32,22 +39,29 @@ function Lobby (game) {
       });
 
       socket.on('next-question', function () {
-        nextQuestion([
-          "Frank Sinatra & Ava Gardner",
-          "Don Johnson & Melanie Griffith",
-          "Natalie Wood & Robert Wagner",
-          "Elizabeth Taylor & Richard Burton"
-        ]);
+        getNextQuestion();
       });
 
       socket.on('send-answer', function (data) {
-        console.log(data);
-        nextQuestion(['ONE', 'TWO', 'THREE', 'FOUR']);
+        game.storeTeamAnswer(
+          socket.id,
+          data.answer,
+          quiz.getQuestionId(),
+          function (allTeamsAnswered) {
+            if (allTeamsAnswered) {
+              getNextQuestion();
+            }
+          });
       });
     });
 
-    function nextQuestion (answers) {
-        app.render('question', {layout: false, answers: answers}, function (err, html) {
+    function getNextQuestion () {
+      var state = quiz.getNextQuestion(function (question) {
+        app.render('question', {
+          layout: false,
+          answers: question.getOptions(),
+          question: question.getQuestion()
+        }, function (err, html) {
           if (err) {
             console.log(err);
           }
@@ -67,6 +81,14 @@ function Lobby (game) {
             });
           }, 1000);
         });
+      });
+
+      if (state === 'EndQuiz') {
+
+      }
+      if (state === 'EndCategory') {
+
+      }
     }
   };
 
