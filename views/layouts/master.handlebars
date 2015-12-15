@@ -7,11 +7,17 @@
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-    <div data-container>
-        {{{body}}}
-    </div>
-
-    <script type="text/javascript" src="/js/app.js"></script>
-
+  <div data-container>
+    {{{body}}}
+  </div>
+  {{#ifCond type '===' 'player'}}
+    <script src="/js/player.js" type="text/javascript"></script>
+  {{/ifCond}}
+  {{#ifCond type '===' 'presenter'}}
+    <script src="/js/presenter.js" type="text/javascript"></script>
+  {{/ifCond}}
+  {{#ifCond type '===' 'admin'}}
+    <script src="/js/admin.js" type="text/javascript"></script>
+  {{/ifCond}}
 </body>
 </html>

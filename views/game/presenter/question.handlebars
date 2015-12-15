@@ -1,0 +1,21 @@
+<div class="header">
+  <h1 class="text-center">{{question}}</h1>
+</div>
+
+<div class="bar">
+  <div class="timer" data-timer></div>
+</div>
+
+{{#each answers}}
+  <div class="answer">
+    <label for="answer{{@index}}">{{this}}</label>
+  </div>
+{{/each}}
+
+
+<div class="overlay hide">
+  <div class="center">
+  <h3>Waiting for other players</h3>
+  <h1 data-countdown>30s</h1>
+  </div>
+</div>
