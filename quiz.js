@@ -75,4 +75,15 @@ Quiz.prototype.getNextCategory = function () {
   return this.getCurrentCategory();
 };
 
+Quiz.prototype.getQuestionTimeByDifficulty = function (difficulty) {
+  switch (difficulty) {
+    case 'Easy':
+      return 30;
+    case 'Medium':
+      return 45;
+    case 'Hard':
+      return 60;
+  }
+};
+
 module.exports = Quiz;

@@ -3,6 +3,7 @@ var io = server.io;
 var app = server.app;
 var Team = require('../database/models/Team');
 var Quiz = require('../quiz');
+var Game = require('../database/models/Game');
 
 function Lobby (game) {
   this.game = game;
@@ -15,6 +16,11 @@ function Lobby (game) {
       easy: 15
     }, this.game);
     var game = this.game;
+    var questionSeconds = 30;
+    var secondsLeft = questionSeconds;
+    var isPaused = false;
+    var countdownInterval;
+
     nsp.on('connection', function (socket) {
       socket.on('join', function (data) {
         Team.getByTeamAndGame(data.team, data.game, function (team) {
@@ -43,15 +49,21 @@ function Lobby (game) {
       });
 
       socket.on('send-answer', function (data) {
-        game.storeTeamAnswer(
-          socket.id,
-          data.answer,
-          quiz.getQuestionId(),
-          function (allTeamsAnswered) {
-            if (allTeamsAnswered) {
-              getNextQuestion();
-            }
+        Game.getByName(game.getName(), function (retreivedGame) {
+          game = retreivedGame;
+          game.storeTeamAnswer(
+            socket.id,
+            data.answer,
+            quiz.getQuestionId(),
+            function (allTeamsAnswered) {
+              if (allTeamsAnswered) {
+                clearInterval(countdownInterval);
+                getNextQuestion();
+              } else {
+                socket.emit('show-wait');
+              }
           });
+        });
       });
     });
 
@@ -68,15 +80,21 @@ function Lobby (game) {
           nsp.emit('page', {
             html: html
           });
-          var totalSeconds = 30;
-          var secondsLeft = totalSeconds;
-          var intervalId = setInterval(function () {
+
+          questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());
+          secondsLeft = questionSeconds;
+
+          countdownInterval = setInterval(function () {
+            if (isPaused) {
+              return;
+            }
             secondsLeft--;
             if (secondsLeft <= 0) {
-              clearInterval(intervalId)
+              clearInterval(countdownInterval);
+              getNextQuestion();
             }
             nsp.emit('countdown-reduce', {
-              totalSeconds: totalSeconds,
+              questionSeconds: questionSeconds,
               secondsLeft: secondsLeft
             });
           }, 1000);

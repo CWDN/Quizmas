@@ -205,15 +205,38 @@ Team.getBySocketId = function (socketId, callback) {
         console.log(err);
       }
       result = res;
-      done = true;
-      db.close();
     });
 
     stmt.finalize(function () {
+      db.close();
       var team = new Team();
       team = team.importFromObject(result.pop());
       if (callback !== undefined) {
         return callback(team);
+      }
+    });
+  });
+};
+
+Team.getCountAnswersForQuestionIdAndGame = function (questionId, game, callback) {
+  var db = getDBConnection();
+  var result = 0;
+  db.serialize(function () {
+    var stmt = db.prepare('SELECT COUNT(answer) as count FROM answers WHERE questionId=? AND game=?');
+    stmt.all([
+      questionId,
+      game
+    ], function (err, res) {
+      if (err) {
+        console.log(err);
+      }
+      result = res.shift();
+    });
+
+    stmt.finalize(function () {
+      db.close();
+      if (callback !== undefined) {
+        callback(result.count);
       }
     });
   });
