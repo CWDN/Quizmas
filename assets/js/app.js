@@ -23,6 +23,10 @@ $(document).ready(function () {
     });
   }
 
+  $('[data-quiz-event="start"]').click(function () {
+    Socket.emit('start');
+  });
+
   Socket.on('new-team', function (data) {
     var team = data.team;
     $('.player-list').append('<li>' + team + '</li>');
@@ -35,5 +39,9 @@ $(document).ready(function () {
         $(this).remove();
       }
     });
+  });
+
+  Socket.on('start', function (data) {
+    alert('The quiz has started!');
   });
 });
