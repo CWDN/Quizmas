@@ -15,6 +15,11 @@ function Lobby (game) {
       easy: 15
     }, this.game);
     var game = this.game;
+    var questionSeconds = 30;
+    var secondsLeft = questionSeconds;
+    var isPaused = false;
+    var countdownInterval;
+
     nsp.on('connection', function (socket) {
       socket.on('join', function (data) {
         Team.getByTeamAndGame(data.team, data.game, function (team) {
@@ -49,6 +54,7 @@ function Lobby (game) {
           quiz.getQuestionId(),
           function (allTeamsAnswered) {
             if (allTeamsAnswered) {
+              clearInterval(countdownInterval);
               getNextQuestion();
             }
           });
@@ -68,16 +74,23 @@ function Lobby (game) {
           nsp.emit('page', {
             html: html
           });
-          var totalSeconds = 30;
-          var secondsLeft = totalSeconds;
-          var intervalId = setInterval(function () {
+
+          questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());
+          secondsLeft = questionSeconds;
+          console.log(questionSeconds);
+
+          countdownInterval = setInterval(function () {
+            if (isPaused) {
+              return;
+            }
             secondsLeft--;
+            console.log(secondsLeft);
             if (secondsLeft <= 0) {
-              clearInterval(intervalId);
-              nextQuestion(['ONE', 'TWO', 'THREE', 'FOUR']);
+              clearInterval(countdownInterval);
+              getNextQuestion();
             }
             nsp.emit('countdown-reduce', {
-              totalSeconds: totalSeconds,
+              questionSeconds: questionSeconds,
               secondsLeft: secondsLeft
             });
           }, 1000);

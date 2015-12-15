@@ -32,7 +32,7 @@ $(document).ready(function () {
   });
 
   Socket.on('countdown-reduce', function (data) {
-    var percentage = ((data.secondsLeft / data.totalSeconds) * 100) + '%';
+    var percentage = ((data.secondsLeft / data.questionSeconds) * 100) + '%';
     $('[data-timer]').css('width', percentage);
     $('[data-countdown]').html(data.secondsLeft + 's');
   });
