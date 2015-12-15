@@ -13,7 +13,8 @@ function Lobby (game) {
       hard: 5,
       medium: 10,
       easy: 15
-    }, game);
+    }, this.game);
+    var game = this.game;
     nsp.on('connection', function (socket) {
       socket.on('join', function (data) {
         Team.getByTeamAndGame(data.team, data.game, function (team) {
@@ -38,33 +39,45 @@ function Lobby (game) {
       });
 
       socket.on('next-question', function () {
-        var state = quiz.getNextQuestion(function (question) {
-          app.render('question', {
-            layout: false,
-            answers: question.getOptions(),
-            question: question.getQuestion()
-          }, function (err, html) {
-            if (err) {
-              console.log(err);
-            }
-            nsp.emit('page', {
-              html: html
-            });
-          });
-        });
-
-        if (state === 'EndQuiz') {
-
-        }
-        if (state === 'EndCategory') {
-
-        }
+        getNextQuestion();
       });
 
       socket.on('send-answer', function (data) {
-        console.log(data);
+        game.storeTeamAnswer(
+          socket.id,
+          data.answer,
+          quiz.getQuestionId(),
+          function (allTeamsAnswered) {
+            if (allTeamsAnswered) {
+              getNextQuestion();
+            }
+          });
       });
     });
+
+    function getNextQuestion () {
+      var state = quiz.getNextQuestion(function (question) {
+        app.render('question', {
+          layout: false,
+          answers: question.getOptions(),
+          question: question.getQuestion()
+        }, function (err, html) {
+          if (err) {
+            console.log(err);
+          }
+          nsp.emit('page', {
+            html: html
+          });
+        });
+      });
+
+      if (state === 'EndQuiz') {
+
+      }
+      if (state === 'EndCategory') {
+
+      }
+    }
   };
 
   this.startWebSockets();
