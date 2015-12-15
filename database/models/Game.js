@@ -6,6 +6,7 @@ var Team = require('./Team');
  */
 function Game () {
   this.teams = [];
+  this.teamsAnswers = {};
   this.name = '';
 }
 
@@ -101,6 +102,21 @@ Game.getByName = function (name, callback) {
       }
       var game = new Game();
       game.importFromObject(result, callback);
+    });
+  });
+};
+
+Game.prototype.storeTeamAnswer = function (socketId, answer, questionId, callback) {
+  var game = this;
+  Team.getBySocketId(socketId, function (team) {
+    team.storeAnswer(questionId, answer, function () {
+      game.teamsAnswers[socketId] = true;
+      game.getTeams().forEach(function (item) {
+        if (game.teamsAnswers[item.getSocketId()] === undefined) {
+          callback(false);
+        }
+      });
+      callback(true);
     });
   });
 };
