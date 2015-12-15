@@ -10,10 +10,10 @@
   <div class="answer">
     <input type="radio" id="answer{{@index}}" name="answer" value="{{this}}" />
     <label for="answer{{@index}}">{{this}}</label>
+    <button class="button button-center" data-send-answer>Submit</button>
   </div>
 {{/each}}
 
-<button class="button button-center" data-send-answer>Submit</button>
 
 <div class="overlay hide">
   <div class="center">

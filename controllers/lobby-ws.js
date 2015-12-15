@@ -32,7 +32,12 @@ function Lobby (game) {
       });
 
       socket.on('next-question', function () {
-        nextQuestion(['Answer1', 'Answer2']);
+        nextQuestion([
+          "Frank Sinatra & Ava Gardner",
+          "Don Johnson & Melanie Griffith",
+          "Natalie Wood & Robert Wagner",
+          "Elizabeth Taylor & Richard Burton"
+        ]);
       });
 
       socket.on('send-answer', function (data) {
