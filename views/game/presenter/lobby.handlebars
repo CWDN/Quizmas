@@ -1,0 +1,28 @@
+<div class="container">
+  <h1>{{game}}</h1>
+
+  <p class="text-center">
+    Waiting for players to join
+  </p>
+
+    <div class="loader">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+
+  <h3>Players</h3>
+
+  <ul class="player-list">
+    {{#each teams}}
+      <li>
+        {{this.name}}
+      </li>
+    {{/each}}
+  </ul>
+</div>
+
+<script>
+  var game = "{{game}}";
+</script>
