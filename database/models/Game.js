@@ -6,7 +6,6 @@ var Team = require('./Team');
  */
 function Game () {
   this.teams = [];
-  this.teamsAnswers = {};
   this.name = '';
 }
 
@@ -110,13 +109,14 @@ Game.prototype.storeTeamAnswer = function (socketId, answer, questionId, callbac
   var game = this;
   Team.getBySocketId(socketId, function (team) {
     team.storeAnswer(questionId, answer, function () {
-      game.teamsAnswers[socketId] = true;
-      game.getTeams().forEach(function (item) {
-        if (game.teamsAnswers[item.getSocketId()] === undefined) {
+      var teams = game.getTeams();
+      Team.getCountAnswersForQuestionIdAndGame(questionId, game.getName(), function (count) {
+        if (count === teams.length) {
+          callback(true);
+        } else {
           callback(false);
         }
       });
-      callback(true);
     });
   });
 };
