@@ -23,3 +23,9 @@ server.listen(3000, function () {
   console.log('Listening on port 3000...');
   console.log('Local Network IP: ' + ipAddress);
 });
+
+Array.prototype.shuffle = function () {
+  return this.sort(function () {
+    return 0.5 - Math.random();
+  });
+};
