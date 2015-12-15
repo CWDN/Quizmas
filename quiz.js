@@ -56,6 +56,10 @@ Quiz.prototype.getNextQuestion = function (callback) {
   this.getNextQuestionByDifficulty(difficulty, callback);
 };
 
+Quiz.prototype.getQuestionId = function () {
+  return this.currentQuestionId;
+};
+
 Quiz.prototype.getCurrentCategory = function () {
   return this.currentCategory;
 };
