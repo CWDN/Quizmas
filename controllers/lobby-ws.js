@@ -23,13 +23,22 @@ function Lobby (game) {
 
     nsp.on('connection', function (socket) {
       socket.on('join', function (data) {
-        Team.getByTeamAndGame(data.team, data.game, function (team) {
-          team.setSocketId(socket.id);
-          team.save();
-        });
-        socket.broadcast.emit('new-team', {
-          team: data.team
-        });
+        if (data.type === 'player') {
+          Team.getByTeamAndGame(data.team, data.game, function (team) {
+            team.setSocketId(socket.id);
+            team.save();
+          });
+          socket.broadcast.emit('new-team', {
+            team: data.team
+          });
+          socket.join('players');
+        }
+        if (data.type === 'presenter') {
+          socket.join('presenters');
+        }
+        if (data.type === 'admin') {
+          socket.join('admins');
+        }
       });
 
       socket.on('disconnect', function () {
@@ -69,7 +78,7 @@ function Lobby (game) {
 
     function getNextQuestion () {
       var state = quiz.getNextQuestion(function (question) {
-        app.render('question', {
+        app.render('game/player/question', {
           layout: false,
           answers: question.getOptions(),
           question: question.getQuestion()
@@ -77,38 +86,62 @@ function Lobby (game) {
           if (err) {
             console.log(err);
           }
-          nsp.emit('page', {
+          nsp.to('players').emit('page', {
             html: html
           });
-
-          questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());
-          secondsLeft = questionSeconds;
-
-          countdownInterval = setInterval(function () {
-            if (isPaused) {
-              return;
-            }
-            secondsLeft--;
-            if (secondsLeft <= 0) {
-              clearInterval(countdownInterval);
-              getNextQuestion();
-            }
-            nsp.emit('countdown-reduce', {
-              questionSeconds: questionSeconds,
-              secondsLeft: secondsLeft
-            });
-          }, 1000);
         });
+
+        app.render('game/presenter/question', {
+          layout: false,
+          answers: question.getOptions(),
+          question: question.getQuestion()
+        }, function (err, html) {
+          if (err) {
+            console.log(err);
+          }
+          nsp.to('presenters').emit('page', {
+            html: html
+          });
+        });
+
+        questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());
+        secondsLeft = questionSeconds;
+
+        countdownInterval = setInterval(function () {
+          if (isPaused) {
+            return;
+          }
+          secondsLeft--;
+          if (secondsLeft <= 0) {
+            clearInterval(countdownInterval);
+            getNextQuestion();
+          }
+          nsp.emit('countdown-reduce', {
+            questionSeconds: questionSeconds,
+            secondsLeft: secondsLeft
+          });
+        }, 1000);
       });
 
       if (state === 'EndQuiz') {
-        app.render('game/results', {
+        app.render('game/player/results', {
           layout: false
         }, function (err, html) {
           if (err) {
             console.log(err);
           }
-          nsp.emit('page', {
+          nsp.to('players').emit('page', {
+            html: html
+          });
+        });
+
+        app.render('game/presenter/results', {
+          layout: false
+        }, function (err, html) {
+          if (err) {
+            console.log(err);
+          }
+          nsp.to('presenters').emit('page', {
             html: html
           });
         });
@@ -121,21 +154,33 @@ function Lobby (game) {
     function getNextCategory () {
       quiz.getNextCategory();
 
-      app.render('game/category', {
+      app.render('game/player/category', {
         layout: false,
         category: quiz.getCurrentCategory()
       }, function (err, html) {
         if (err) {
           console.log(err);
         }
-        nsp.emit('page', {
+        nsp.to('players').emit('page', {
           html: html
         });
-
-        setTimeout(function () {
-          getNextQuestion();
-        }, 4000);
       });
+
+      app.render('game/presenter/category', {
+        layout: false,
+        category: quiz.getCurrentCategory()
+      }, function (err, html) {
+        if (err) {
+          console.log(err);
+        }
+        nsp.to('presenters').emit('page', {
+          html: html
+        });
+      });
+
+      setTimeout(function () {
+        getNextQuestion();
+      }, 5000);
     }
   };
 
