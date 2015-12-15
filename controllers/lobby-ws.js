@@ -1,4 +1,6 @@
-var io = require('../server').io;
+var server = require('../server');
+var io = server.io;
+var app = server.app;
 var Team = require('../database/models/Team');
 
 function Lobby (game) {
@@ -28,7 +30,27 @@ function Lobby (game) {
           team.delete();
         });
       });
+
+      socket.on('next-question', function () {
+        nextQuestion(['Answer1', 'Answer2']);
+      });
+
+      socket.on('send-answer', function (data) {
+        console.log(data);
+        nextQuestion(['ONE', 'TWO', 'THREE', 'FOUR']);
+      });
     });
+
+    function nextQuestion (answers) {
+        app.render('question', {layout: false, answers: answers}, function (err, html) {
+          if (err) {
+            console.log(err);
+          }
+          nsp.emit('page', {
+            html: html
+          });
+        });
+    }
   };
 
   this.startWebSockets();
