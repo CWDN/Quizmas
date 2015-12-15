@@ -19,16 +19,32 @@ gulp.task('less', function () {
     .pipe(gulp.dest('public/css/'));
 });
 
-gulp.task('js', function () {
-  return gulp.src('assets/js/*.js')
+function createJS (srcFiles, dest) {
+  return gulp.src(srcFiles)
     .pipe(sourcemaps.init())
-    .pipe(concat('app.js'))
+    .pipe(concat(dest))
     .pipe(uglify())
     .pipe(sourcemaps.write())
     .pipe(gulp.dest('public/js/'));
+}
+
+gulp.task('js:admin', function () {
+  return createJS(['assets/js/*.js', 'assets/js/admin/*.js'], 'admin.js');
 });
+
+gulp.task('js:presenter', function () {
+  return createJS(['assets/js/*.js', 'assets/js/presenter/*.js'], 'presenter.js');
+});
+
+gulp.task('js:player', function () {
+  return createJS(['assets/js/*.js', 'assets/js/player/*.js'], 'player.js');
+});
+
+gulp.task('js', ['js:admin', 'js:presenter', 'js:player']);
 
 gulp.task('watch', function () {
   gulp.watch(['assets/less/*'], ['less']);
-  gulp.watch(['assets/js/*'], ['js']);
+  gulp.watch(['assets/js/*', 'assets/js/admin/*'], ['js:admin']);
+  gulp.watch(['assets/js/*', 'assets/js/presenter/*'], ['js:presenter']);
+  gulp.watch(['assets/js/*', 'assets/js/player/*'], ['js:player']);
 });
