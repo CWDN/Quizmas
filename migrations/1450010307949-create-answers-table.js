@@ -3,7 +3,7 @@
 exports.up = function (next) {
   var db = getDBConnection();
   db.serialize(function () {
-    db.run('CREATE TABLE answers (lobby_id INTEGER, team_name TEXT, answer TEXT, question_id INTEGER)');
+    db.run('CREATE TABLE answers (game TEXT, teamName TEXT, answer TEXT, questionId INTEGER)');
   });
   db.close(function () {
     next();
