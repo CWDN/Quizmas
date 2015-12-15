@@ -5,7 +5,7 @@ console.log('Seeding questions');
 
 db.serialize(function () {
   db.run('begin transaction');
-  var stmt = db.prepare('INSERT INTO questions VALUES (?, ?, ?, ?, ?)');
+  var stmt = db.prepare('INSERT INTO questions (question, options, correctAnswer, difficulty, category) VALUES (?, ?, ?, ?, ?)');
   var questionsString = fs.readFileSync(__dirname + '/data/multi-choice.json').toString();
   var categories = JSON.parse(questionsString);
   for (var category in categories) {
@@ -13,7 +13,7 @@ db.serialize(function () {
     for (var index in questions) {
       var question = questions[index];
       stmt.run([
-        question.question,
+        question.question + '?',
         JSON.stringify(question.answers),
         question.correctAnswer,
         question.difficulty,
