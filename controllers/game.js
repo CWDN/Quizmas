@@ -12,7 +12,10 @@ router.post('/create', function (req, res) {
   game.setName(req.body.game);
   game.create();
   new Lobby(game);
-  return res.render('game/presenter-lobby', {game: game.getName()});
+  return res.render('game/admin/lobby', {
+    game: game.getName(),
+    type: 'admin'
+  });
 });
 
 router.post('/join', function (req, res) {
@@ -21,7 +24,7 @@ router.post('/join', function (req, res) {
       res.redirect('/');
       return;
     }
-    res.render('game/team-name', {game: game.getName()}, function (err, html) {
+    res.render('game/player/team-name', {game: game.getName()}, function (err, html) {
       if (err) {
         console.log(err);
       }
@@ -49,10 +52,11 @@ router.post('/:game/lobby', function (req, res) {
     }
     game.addTeam(req.body.teamName);
 
-    res.render('game/player-lobby', {
+    res.render('game/player/lobby', {
       game: game.getName(),
       teams: game.getTeams(),
-      currentTeam: req.body.teamName
+      currentTeam: req.body.teamName,
+      type: 'player'
     }, function (err, html) {
       if (err) {
         console.log(err);
@@ -68,9 +72,10 @@ router.get('/:game/lobby/presenter', function (req, res) {
       res.redirect('/');
       return;
     }
-    res.render('game/presenter-lobby', {
+    res.render('game/presenter/lobby', {
       game: game.getName(),
-      teams: game.getTeams()
+      teams: game.getTeams(),
+      type: 'presenter'
     }, function (err, html) {
       if (err) {
         console.log(err);
