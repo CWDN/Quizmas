@@ -42,7 +42,6 @@ function Lobby (game) {
 
       socket.on('send-answer', function (data) {
         console.log(data);
-        nextQuestion(['ONE', 'TWO', 'THREE', 'FOUR']);
       });
     });
 
@@ -59,7 +58,8 @@ function Lobby (game) {
           var intervalId = setInterval(function () {
             secondsLeft--;
             if (secondsLeft <= 0) {
-              clearInterval(intervalId)
+              clearInterval(intervalId);
+              nextQuestion(['ONE', 'TWO', 'THREE', 'FOUR']);
             }
             nsp.emit('countdown-reduce', {
               totalSeconds: totalSeconds,
