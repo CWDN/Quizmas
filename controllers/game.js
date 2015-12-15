@@ -30,6 +30,17 @@ router.post('/join', function (req, res) {
   });
 });
 
+router.post('/join-presenter', function (req, res) {
+  Game.getByName(req.body.game, function (game) {
+    if (game === undefined) {
+      res.redirect('/');
+      return;
+    }
+
+    res.redirect(game.name + '/lobby/presenter');
+  });
+});
+
 router.post('/:game/lobby', function (req, res) {
   Game.getByName(req.params.game, function (game) {
     if (game === undefined) {
