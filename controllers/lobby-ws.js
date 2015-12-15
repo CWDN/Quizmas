@@ -3,6 +3,7 @@ var io = server.io;
 var app = server.app;
 var Team = require('../database/models/Team');
 var Quiz = require('../quiz');
+var Game = require('../database/models/Game');
 
 function Lobby (game) {
   this.game = game;
@@ -48,18 +49,21 @@ function Lobby (game) {
       });
 
       socket.on('send-answer', function (data) {
-        game.storeTeamAnswer(
-          socket.id,
-          data.answer,
-          quiz.getQuestionId(),
-          function (allTeamsAnswered) {
-            if (allTeamsAnswered) {
-              clearInterval(countdownInterval);
-              getNextQuestion();
-            } else {
-              socket.emit('show-wait');
-            }
+        Game.getByName(game.getName(), function (retreivedGame) {
+          game = retreivedGame;
+          game.storeTeamAnswer(
+            socket.id,
+            data.answer,
+            quiz.getQuestionId(),
+            function (allTeamsAnswered) {
+              if (allTeamsAnswered) {
+                clearInterval(countdownInterval);
+                getNextQuestion();
+              } else {
+                socket.emit('show-wait');
+              }
           });
+        });
       });
     });
 
@@ -79,14 +83,12 @@ function Lobby (game) {
 
           questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());
           secondsLeft = questionSeconds;
-          console.log(questionSeconds);
 
           countdownInterval = setInterval(function () {
             if (isPaused) {
               return;
             }
             secondsLeft--;
-            console.log(secondsLeft);
             if (secondsLeft <= 0) {
               clearInterval(countdownInterval);
               getNextQuestion();
