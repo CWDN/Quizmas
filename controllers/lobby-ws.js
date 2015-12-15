@@ -56,6 +56,8 @@ function Lobby (game) {
             if (allTeamsAnswered) {
               clearInterval(countdownInterval);
               getNextQuestion();
+            } else {
+              socket.emit('show-wait');
             }
           });
       });

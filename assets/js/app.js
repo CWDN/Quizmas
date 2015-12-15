@@ -43,6 +43,9 @@ $(document).ready(function () {
     Socket.emit('send-answer', {
       answer: answer
     });
+  });
+
+  Socket.on('show-wait', function () {
     $('.overlay').removeClass('hide');
   });
 });
