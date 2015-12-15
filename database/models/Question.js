@@ -105,6 +105,35 @@ Question.getByCategory = function (category, callback) {
   });
 };
 
+Question.getOneByCategoryAndDifficultyButExcluding = function (category, difficulty, exlcudeIds, callback) {
+  var db = getDBConnection();
+  var result;
+  db.serialize(function () {
+    var questionMarks = Array(exlcudeIds.length).fill('?');
+    var stmt = db.prepare('SELECT * FROM questions WHERE category=? AND difficulty=? AND id NOT IN (' + questionMarks + ') ORDER BY RANDOM() LIMIT 1');
+    var parameters = [
+      category,
+      difficulty
+    ];
+    parameters = parameters.concat(exlcudeIds);
+    stmt.all(parameters, function (err, res) {
+      if (err) throw err;
+      result = res;
+    });
+    stmt.finalize(function () {
+      db.close();
+      if (result.length > 0) {
+        result = result.shift();
+      } else {
+        callback(undefined);
+      }
+      var questionObj = new Question();
+      questionObj.importFromObject(result);
+      callback(questionObj);
+    });
+  });
+};
+
 /**
  * Gets the sqlite db.
  * @return {sqlite.Database}
