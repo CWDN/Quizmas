@@ -10,7 +10,7 @@ function Lobby (game) {
 
   this.startWebSockets = function () {
     var nsp = io.of('/' + this.game.getName());
-    var quiz = new Quiz(['General Knowledge'], {
+    var quiz = new Quiz(['General Knowledge', 'Maths', 'Sport & Leisure'], {
       hard: 5,
       medium: 10,
       easy: 15
@@ -45,7 +45,7 @@ function Lobby (game) {
       });
 
       socket.on('next-question', function () {
-        getNextQuestion();
+        getNextCategory();
       });
 
       socket.on('send-answer', function (data) {
@@ -102,11 +102,40 @@ function Lobby (game) {
       });
 
       if (state === 'EndQuiz') {
-
+        app.render('game/results', {
+          layout: false
+        }, function (err, html) {
+          if (err) {
+            console.log(err);
+          }
+          nsp.emit('page', {
+            html: html
+          });
+        });
       }
       if (state === 'EndCategory') {
-
+        getNextCategory();
       }
+    }
+
+    function getNextCategory () {
+      quiz.getNextCategory();
+
+      app.render('game/category', {
+        layout: false,
+        category: quiz.getCurrentCategory()
+      }, function (err, html) {
+        if (err) {
+          console.log(err);
+        }
+        nsp.emit('page', {
+          html: html
+        });
+
+        setTimeout(function () {
+          getNextQuestion();
+        }, 4000);
+      });
     }
   };
 

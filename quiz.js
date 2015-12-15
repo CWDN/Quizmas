@@ -7,7 +7,7 @@ function Quiz (categories, difficulties, game) {
   this.totalMedium = difficulties.medium;
   this.totalEasy = difficulties.easy;
   this.game = game;
-  this.currentCategory = this.categories.shift();
+  this.currentCategory = '';
   this.currentQuestionId = 0;
   this.currentHard = 0;
   this.currentMedium = 0;
