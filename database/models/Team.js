@@ -107,6 +107,29 @@ Team.prototype.delete = function () {
   });
 };
 
+Team.prototype.storeAnswer = function (questionId, answer, callback) {
+  var db = getDBConnection();
+  var result;
+  var team = this;
+  db.serialize(function () {
+    var stmt = db.prepare('INSERT INTO answers (game, teamName, answer, questionId) VALUES(?,?,?,?)');
+    stmt.run([
+        team.getGame(),
+        team.getName(),
+        answer,
+        questionId
+      ],
+      function (err, res) {
+      if (err) throw err;
+      result = res;
+    });
+    stmt.finalize(function () {
+      db.close();
+      callback();
+    });
+  });
+};
+
 Team.prototype.importFromObject = function (object) {
   if (object === undefined) {
     return undefined;
