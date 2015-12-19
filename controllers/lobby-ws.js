@@ -116,6 +116,10 @@ function Lobby (game) {
           });
         });
 
+        nsp.to('admins').emit('question', {
+          question: question.getQuestion()
+        });
+
         questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());
         secondsLeft = questionSeconds;
 
