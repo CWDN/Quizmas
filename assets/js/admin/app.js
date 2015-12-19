@@ -17,6 +17,13 @@ $(document).ready(function () {
     Socket.emit('pause', {pause: pause});
   });
 
+  $(document).on('click', '[data-quiz-event="team-lock"]', function () {
+    var $this = $(this);
+    var socketId = $this.parents('[data-quiz-socketId]').attr('data-quiz-socketId');
+    Socket.emit('unlock', {socketId: socketId});
+    $this.addClass('hide');
+  });
+
   Socket.on('new-team', function (data) {
     var templateHtml = $('template#team-item').html();
     var updatedHtml = templateHtml.replace('{SOCKETID}', data.socketId);
@@ -48,5 +55,13 @@ $(document).ready(function () {
 
   Socket.on('question', function (data) {
     $('[data-quiz="current-question"] h3').html(data.question);
+    $('[data-quiz-event="team-lock"]').addClass('hide');
+  });
+
+  Socket.on('team-answered', function (data) {
+    var $unlockButton = $('[data-quiz-socketId="' +
+                                    data.socketId +
+                          '"] [data-quiz-event="team-lock"]');
+    $unlockButton.removeClass('hide');
   });
 });
