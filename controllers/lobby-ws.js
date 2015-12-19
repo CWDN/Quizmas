@@ -76,6 +76,16 @@ function Lobby (game) {
           });
         });
       });
+
+      socket.on('pause', function (data) {
+        isPaused = data.pause;
+
+        if (isPaused) {
+          nsp.to('admins').emit('paused', {});
+        } else {
+          nsp.to('admins').emit('resume', {});
+        }
+      });
     });
 
     function getNextQuestion () {
