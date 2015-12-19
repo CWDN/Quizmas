@@ -36,4 +36,8 @@ $(document).ready(function () {
   Socket.on('page', function (data) {
     $('[data-container]').html(data.html);
   });
+
+  Socket.on('unlock', function (data) {
+    $('.overlay').addClass('hide');
+  });
 });
