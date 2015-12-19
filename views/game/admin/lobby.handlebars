@@ -28,14 +28,9 @@
   <template id="team-item">
     <div class="col-xs-12 col-sm-6 col-md-4 well text-center" data-quiz-socketId="{SOCKETID}">
       <h4 data-quiz="team-name">{TEAMNAME}</h4>
-      <div class="hide" data-quiz="initialhide">
-        <button class="btn btn-flat btn-lg" data-quiz-event="team-lock">
+        <button class="btn btn-flat btn-lg hide" data-quiz-event="team-lock">
           Unlock
         </button>
-        <button class="btn btn-flat btn-lg" data-quiz-event="team-refresh">
-          Refresh
-        </button>
-      </div>
     </div>
   </template>
 </div>
