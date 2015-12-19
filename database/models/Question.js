@@ -63,7 +63,10 @@ Question.getByQuestion = function (question, callback) {
     var stmt = db.prepare('SELECT * FROM questions WHERE question=?');
     stmt.run(question);
     stmt.all(function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error getting question by question');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
@@ -87,7 +90,10 @@ Question.getByCategory = function (category, callback) {
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM questions WHERE category=?');
     stmt.all(category, function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error getting question by category');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
@@ -117,7 +123,10 @@ Question.getOneByCategoryAndDifficultyButExcluding = function (category, difficu
     ];
     parameters = parameters.concat(exlcudeIds);
     stmt.all(parameters, function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error getting one by category, difficulty');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {

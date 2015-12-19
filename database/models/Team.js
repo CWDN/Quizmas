@@ -120,7 +120,10 @@ Team.prototype.storeAnswer = function (questionId, answer, callback) {
         questionId
       ],
       function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error storing teams answer');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
@@ -155,7 +158,10 @@ Team.getByGame = function (game, callback) {
     var stmt = db.prepare('SELECT * FROM teams WHERE game=?');
     stmt.run(game);
     stmt.all(function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error getting team by game');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
@@ -202,6 +208,7 @@ Team.getBySocketId = function (socketId, callback) {
     var stmt = db.prepare('SELECT * FROM teams WHERE socketId=?');
     stmt.all([socketId], function (err, res) {
       if (err) {
+        console.log('Errored on getBySocketId');
         console.log(err);
       }
       result = res;
