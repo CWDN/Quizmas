@@ -75,6 +75,8 @@ function Lobby (game) {
               }
           });
         });
+
+        nsp.to('admins').emit('team-answered', {socketId: socket.id});
       });
 
       socket.on('pause', function (data) {
@@ -85,6 +87,17 @@ function Lobby (game) {
         } else {
           nsp.to('admins').emit('resume', {});
         }
+      });
+
+      socket.on('unlock', function (data) {
+        Team.getBySocketId(data.socketId, function (team) {
+          if (team === undefined) {
+            return;
+          }
+          team.removeAnswerForQuestion(quiz.getQuestionId());
+        });
+
+        nsp.to(data.socketId).emit('unlock');
       });
     });
 
