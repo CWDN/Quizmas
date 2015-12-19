@@ -133,6 +133,32 @@ Team.prototype.storeAnswer = function (questionId, answer, callback) {
   });
 };
 
+Team.prototype.removeAnswerForQuestion = function (questionId) {
+  var db = getDBConnection();
+  var team = this;
+  db.serialize(function () {
+    var stmt = db.prepare('DELETE FROM answers WHERE teamName=? AND questionId=? AND game=?');
+    stmt.run([
+      team.getName(),
+      questionId,
+      team.getGame()
+    ], function (err) {
+      if (err) {
+        console.log('Remove answer');
+        console.log(err);
+      }
+    });
+
+    stmt.finalize(function (err) {
+      if (err) {
+        console.log('Remove answer finalize');
+        console.log(err);
+      }
+      db.close();
+    });
+  });
+};
+
 Team.prototype.importFromObject = function (object) {
   if (object === undefined) {
     return undefined;
