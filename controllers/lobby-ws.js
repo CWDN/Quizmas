@@ -27,9 +27,10 @@ function Lobby (game) {
           Team.getByTeamAndGame(data.team, data.game, function (team) {
             team.setSocketId(socket.id);
             team.save();
-          });
-          socket.broadcast.emit('new-team', {
-            team: data.team
+            socket.broadcast.emit('new-team', {
+              team: team.getName(),
+              socketId: team.getSocketId()
+            });
           });
           socket.join('players');
         }
@@ -47,7 +48,8 @@ function Lobby (game) {
             return;
           }
           socket.broadcast.emit('remove-team', {
-            team: team.getName()
+            team: team.getName(),
+            socketId: team.getSocketId()
           });
           team.delete();
         });
