@@ -27,9 +27,10 @@ function Lobby (game) {
           Team.getByTeamAndGame(data.team, data.game, function (team) {
             team.setSocketId(socket.id);
             team.save();
-          });
-          socket.broadcast.emit('new-team', {
-            team: data.team
+            socket.broadcast.emit('new-team', {
+              team: team.getName(),
+              socketId: team.getSocketId()
+            });
           });
           socket.join('players');
         }
@@ -47,7 +48,8 @@ function Lobby (game) {
             return;
           }
           socket.broadcast.emit('remove-team', {
-            team: team.getName()
+            team: team.getName(),
+            socketId: team.getSocketId()
           });
           team.delete();
         });
@@ -73,6 +75,29 @@ function Lobby (game) {
               }
           });
         });
+
+        nsp.to('admins').emit('team-answered', {socketId: socket.id});
+      });
+
+      socket.on('pause', function (data) {
+        isPaused = data.pause;
+
+        if (isPaused) {
+          nsp.to('admins').emit('paused', {});
+        } else {
+          nsp.to('admins').emit('resume', {});
+        }
+      });
+
+      socket.on('unlock', function (data) {
+        Team.getBySocketId(data.socketId, function (team) {
+          if (team === undefined) {
+            return;
+          }
+          team.removeAnswerForQuestion(quiz.getQuestionId());
+        });
+
+        nsp.to(data.socketId).emit('unlock');
       });
     });
 
@@ -102,6 +127,10 @@ function Lobby (game) {
           nsp.to('presenters').emit('page', {
             html: html
           });
+        });
+
+        nsp.to('admins').emit('question', {
+          question: question.getQuestion()
         });
 
         questionSeconds = quiz.getQuestionTimeByDifficulty(question.getDifficulty());

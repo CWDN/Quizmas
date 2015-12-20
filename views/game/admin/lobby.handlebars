@@ -1,30 +1,39 @@
 <div class="container">
-  <h1>{{game}}</h1>
-
-  <button class="button" data-quiz-event="start">Start</button>
-
-  <p class="text-center">
-    Waiting for players to join
-  </p>
-
-    <div class="loader">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
+  <div class="row">
+    <div class="col-xs-12">
+      <h1 class="page-header">Quizmas - {{game}}</h1>
+      <button class="button" data-quiz-event="start">Start</button>
     </div>
+  </div>
+  <div class="row hide" data-quiz="initialhide">
+    <div data-quiz="current-question" class="text-center">
+      <h2>Current Question</h2>
+      <h3>
+      </h3>
+    </div>
+    <div class="text-center">
+      <button class="button" data-quiz-event="previous-question">Previous</button>
+      <button class="button" data-quiz-event="pause-quiz">Pause</button>
+      <button class="button" data-quiz-event="next-question">Skip</button>
+    </div>
+  </div>
 
-  <h3>Players</h3>
+  <div class="row" data-quiz="teams">
+    <h2>Teams</h2>
+    <div class="team-list">
 
-  <ul class="player-list">
-    {{#each teams}}
-      <li>
-        {{this.name}}
-      </li>
-    {{/each}}
-  </ul>
+    </div>
+  </div>
+
+  <template id="team-item">
+    <div class="col-xs-12 col-sm-6 col-md-4 well text-center" data-quiz-socketId="{SOCKETID}">
+      <h4 data-quiz="team-name">{TEAMNAME}</h4>
+        <button class="btn btn-flat btn-lg hide" data-quiz-event="team-lock">
+          Unlock
+        </button>
+    </div>
+  </template>
 </div>
-
 <script>
   var game = "{{game}}";
 </script>

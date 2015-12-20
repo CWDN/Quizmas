@@ -86,9 +86,17 @@ Game.getByName = function (name, callback) {
   var result;
   db.serialize(function () {
     var stmt = db.prepare('SELECT * FROM games WHERE name=?');
-    stmt.run(name);
+    stmt.run(name, function (err) {
+      if (err) {
+        console.log('Error getting game by name');
+        console.log(err);
+      }
+    });
     stmt.all(function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error getting Game by Name');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {

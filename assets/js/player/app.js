@@ -7,6 +7,19 @@ $(document).ready(function () {
       type: 'player'
     });
   }
+  Socket.on('new-team', function (data) {
+    var team = data.team;
+    $('.player-list').append('<li>' + team + '</li>');
+  });
+
+  Socket.on('remove-team', function (data) {
+    var team = data.team;
+    $('.player-list li').each(function () {
+      if (team === $(this).html().trim()) {
+        $(this).remove();
+      }
+    });
+  });
 
   $(document).on('click', '[data-send-answer]', function () {
     var $selected = $('.answer input[type="radio"]:checked');
@@ -22,5 +35,9 @@ $(document).ready(function () {
 
   Socket.on('page', function (data) {
     $('[data-container]').html(data.html);
+  });
+
+  Socket.on('unlock', function (data) {
+    $('.overlay').addClass('hide');
   });
 });

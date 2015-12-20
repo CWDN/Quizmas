@@ -120,12 +120,41 @@ Team.prototype.storeAnswer = function (questionId, answer, callback) {
         questionId
       ],
       function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error storing teams answer');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
       db.close();
       callback();
+    });
+  });
+};
+
+Team.prototype.removeAnswerForQuestion = function (questionId) {
+  var db = getDBConnection();
+  var team = this;
+  db.serialize(function () {
+    var stmt = db.prepare('DELETE FROM answers WHERE teamName=? AND questionId=? AND game=?');
+    stmt.run([
+      team.getName(),
+      questionId,
+      team.getGame()
+    ], function (err) {
+      if (err) {
+        console.log('Remove answer');
+        console.log(err);
+      }
+    });
+
+    stmt.finalize(function (err) {
+      if (err) {
+        console.log('Remove answer finalize');
+        console.log(err);
+      }
+      db.close();
     });
   });
 };
@@ -155,7 +184,10 @@ Team.getByGame = function (game, callback) {
     var stmt = db.prepare('SELECT * FROM teams WHERE game=?');
     stmt.run(game);
     stmt.all(function (err, res) {
-      if (err) throw err;
+      if (err) {
+        console.log('Error getting team by game');
+        console.log(err);
+      }
       result = res;
     });
     stmt.finalize(function () {
@@ -202,6 +234,7 @@ Team.getBySocketId = function (socketId, callback) {
     var stmt = db.prepare('SELECT * FROM teams WHERE socketId=?');
     stmt.all([socketId], function (err, res) {
       if (err) {
+        console.log('Errored on getBySocketId');
         console.log(err);
       }
       result = res;
