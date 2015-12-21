@@ -56,15 +56,15 @@ Question.prototype.importFromObject = function (object) {
   return this;
 };
 
-Question.getByQuestion = function (question, callback) {
+Question.getByQuestionId = function (questionId, callback) {
   var db = getDBConnection();
   var result;
   db.serialize(function () {
-    var stmt = db.prepare('SELECT * FROM questions WHERE question=?');
-    stmt.run(question);
+    var stmt = db.prepare('SELECT * FROM questions WHERE id=?');
+    stmt.run(questionId);
     stmt.all(function (err, res) {
       if (err) {
-        console.log('Error getting question by question');
+        console.log('Error getting question by question id');
         console.log(err);
       }
       result = res;
@@ -139,6 +139,42 @@ Question.getOneByCategoryAndDifficultyButExcluding = function (category, difficu
       var questionObj = new Question();
       questionObj.importFromObject(result);
       callback(questionObj);
+    });
+  });
+};
+
+Question.getQuestions = function (questionIds, callback) {
+  var db = getDBConnection();
+  var result;
+  db.serialize(function () {
+    var questionMarks = Array(questionIds.length).fill('?');
+    var stmt = db.prepare('SELECT * FROM questions WHERE id IN (' + questionMarks + ')');
+    var parameters = questionIds;
+    stmt.all(parameters, function (err, res) {
+      if (err) {
+        console.log('Error getting questions');
+        console.log(err);
+      }
+      result = res;
+    });
+    stmt.finalize(function (err) {
+      if (err) {
+        console.log('Error finalising getQuestions statement');
+        console.log(err);
+        db.close();
+        return;
+      }
+      db.close();
+      if (result.length === 0) {
+        callback([]);
+      }
+
+      var questionObjects = result.map(function (item) {
+        var questionObj = new Question();
+        questionObj.importFromObject(item);
+        return questionObj;
+      });
+      callback(questionObjects);
     });
   });
 };

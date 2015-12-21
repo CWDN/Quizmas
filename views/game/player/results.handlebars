@@ -1,12 +1,19 @@
-<h1>Results</h1>
+<div class="header">
+  <div class="text-center">
+    <h1>Results</h1>
+    <h4>You scored {{totalCorrect}} out of {{totalQuestions}}</h4>
+  </div>
+</div>
 
-<h2>Cat one</h2>
-<div>
-  Team one - 12
-</div>
-<div>
-  Team two - 10
-</div>
-<div>
-  Team three - 9
-</div>
+{{#each answers}}
+  <h2>{{this.question}}</h2>
+  <h3>Your answer: {{this.answer}}</h3>
+  <p>
+    {{#if this.correct}}
+      You got it right
+    {{else}}
+      You got it wrong.
+      Correct answer was {{this.correctAnswer}}.
+    {{/if}}
+  </p>
+{{/each}}

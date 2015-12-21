@@ -86,4 +86,8 @@ Quiz.prototype.getQuestionTimeByDifficulty = function (difficulty) {
   }
 };
 
+Quiz.prototype.getUsedQuestions = function () {
+  return this.usedQuestions;
+};
+
 module.exports = Quiz;
