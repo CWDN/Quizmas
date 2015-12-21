@@ -107,17 +107,17 @@ Team.prototype.delete = function () {
   });
 };
 
-Team.prototype.storeAnswer = function (questionId, answer, callback) {
+Team.prototype.storeAnswer = function (questionId, answer, correct, callback) {
   var db = getDBConnection();
-  var result;
   var team = this;
   db.serialize(function () {
-    var stmt = db.prepare('INSERT INTO answers (game, teamName, answer, questionId) VALUES(?,?,?,?)');
+    var stmt = db.prepare('INSERT INTO answers (game, teamName, answer, questionId, correct) VALUES(?,?,?,?,?)');
     stmt.run([
         team.getGame(),
         team.getName(),
         answer,
-        questionId
+        questionId,
+        correct
       ],
       function (err, res) {
       if (err) {
@@ -270,6 +270,69 @@ Team.getCountAnswersForQuestionIdAndGame = function (questionId, game, callback)
       db.close();
       if (callback !== undefined) {
         callback(result.count);
+      }
+    });
+  });
+};
+
+Team.getAnswersForTeamQuestionIdsAndGame = function (team, questionIds, game, callback) {
+  var db = getDBConnection();
+  var result = [];
+  db.serialize(function () {
+    var questionMarks = Array(questionIds.length).fill('?');
+    var stmt = db.prepare('SELECT * FROM answers WHERE teamName=? AND game=? AND questionId in (' + questionMarks + ')');
+    var parameters = [
+      team,
+      game
+    ];
+    parameters = parameters.concat(questionIds);
+    stmt.all(parameters, function (err, res) {
+      if (err) {
+        console.log(err);
+      }
+      result = res;
+    });
+
+    stmt.finalize(function (err) {
+      if (err) {
+        console.log(err);
+      }
+      db.close();
+      if (callback !== undefined) {
+        callback(result);
+      }
+    });
+  });
+};
+
+Team.getTotalCorrectAnswersForTeamsAndGame = function (teams, game, callback) {
+  var db = getDBConnection();
+  var result = [];
+  db.serialize(function () {
+    var teamCounts = [];
+    for (var teamIndex in teams) {
+      var team = teams[teamIndex].name;
+      teamCounts.push("count(case teamName when '" + team + "' then 1 else null end) as '" + team + "'");
+    }
+
+    var stmt = db.prepare('SELECT ' + teamCounts.join(',') + ' FROM answers WHERE game=?');
+    var parameters = [
+      game
+    ];
+    stmt.all(parameters, function (err, res) {
+      if (err) {
+        console.log(err);
+      }
+      result = res;
+    });
+
+    stmt.finalize(function (err) {
+      if (err) {
+        console.log(err);
+      }
+      db.close();
+      if (callback !== undefined) {
+        callback(result);
       }
     });
   });
