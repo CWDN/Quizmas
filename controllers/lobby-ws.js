@@ -4,16 +4,17 @@ var app = server.app;
 var Team = require('../database/models/Team');
 var Quiz = require('../quiz');
 var Game = require('../database/models/Game');
+var Question = require('../database/models/Question');
 
 function Lobby (game) {
   this.game = game;
 
   this.startWebSockets = function () {
     var nsp = io.of('/' + this.game.getName());
-    var quiz = new Quiz(['General Knowledge', 'Maths', 'Sport & Leisure'], {
-      hard: 5,
-      medium: 10,
-      easy: 15
+    var quiz = new Quiz(['General Knowledge'], {
+      hard: 0,
+      medium: 0,
+      easy: 1
     }, this.game);
     var game = this.game;
     var questionSeconds = 30;
@@ -62,17 +63,20 @@ function Lobby (game) {
       socket.on('send-answer', function (data) {
         Game.getByName(game.getName(), function (retreivedGame) {
           game = retreivedGame;
-          game.storeTeamAnswer(
-            socket.id,
-            data.answer,
-            quiz.getQuestionId(),
-            function (allTeamsAnswered) {
-              if (allTeamsAnswered) {
-                clearInterval(countdownInterval);
-                getNextQuestion();
-              } else {
-                socket.emit('show-wait');
-              }
+          Question.getByQuestionId(quiz.getQuestionId(), function (question) {
+            game.storeTeamAnswer(
+              socket.id,
+              data.answer,
+              quiz.getQuestionId(),
+              question.correctAnswer === data.answer,
+              function (allTeamsAnswered) {
+                if (allTeamsAnswered) {
+                  clearInterval(countdownInterval);
+                  getNextQuestion();
+                } else {
+                  socket.emit('show-wait');
+                }
+              });
           });
         });
 
@@ -153,26 +157,40 @@ function Lobby (game) {
       });
 
       if (state === 'EndQuiz') {
-        app.render('game/player/results', {
-          layout: false
-        }, function (err, html) {
-          if (err) {
-            console.log(err);
-          }
-          nsp.to('players').emit('page', {
-            html: html
-          });
-        });
+        Question.getQuestions(quiz.getUsedQuestions(), function (questions) {
+          var teams = game.getTeams();
+          sendPlayerResults(questions, teams);
 
-        app.render('game/presenter/results', {
-          layout: false
-        }, function (err, html) {
-          if (err) {
-            console.log(err);
-          }
-          nsp.to('presenters').emit('page', {
-            html: html
-          });
+          Team.getTotalCorrectAnswersForTeamsAndGame(
+            game.getTeams(),
+            game.getName(),
+            function (answerCounts) {
+              var teams = [];
+              for (var teamIndex = 0; teamIndex < answerCounts.length; teamIndex++) {
+                var team = answerCounts[teamIndex];
+                var teamName = Object.keys(team)[0];
+                teams.push({
+                  team: teamName,
+                  count: team[teamName]
+                });
+              }
+              var totalQuestions = quiz.getUsedQuestions().length;
+
+              app.render('game/presenter/results', {
+                layout: false,
+                teams: teams,
+                totalQuestions: totalQuestions
+              }, function (err, html) {
+                if (err) {
+                  console.log('ERROR RENDERING');
+                  console.log(err);
+                }
+                nsp.to('presenters').emit('page', {
+                  html: html
+                });
+              });
+            }
+          );
         });
       }
       if (state === 'EndCategory') {
@@ -210,6 +228,54 @@ function Lobby (game) {
       setTimeout(function () {
         getNextQuestion();
       }, 5000);
+    }
+
+    function sendPlayerResults (questions, teams) {
+      for (var index = 0; index < teams.length; index++) {
+        var team = teams[index];
+        Team.getAnswersForTeamQuestionIdsAndGame(
+          team.name,
+          quiz.getUsedQuestions(),
+          game.getName(),
+          function (answers) {
+            var totalCorrect = 0;
+            var formattedAnswers = [];
+            for (var questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+              var question = questions[questionIndex];
+              var answer = {
+                question: question.question,
+                answer: '',
+                correctAnswer: '',
+                correct: false
+              };
+              for (var answerIndex = 0; answerIndex < answers.length; answerIndex++) {
+                if (question.id === answers[answerIndex].questionId) {
+                  answer.answer = answers[answerIndex].answer;
+                  answer.correctAnswer = question.correctAnswer;
+                  if (answers[answerIndex].correct) {
+                    answer.correct = true;
+                    totalCorrect++;
+                  }
+                }
+              }
+              formattedAnswers.push(answer);
+            }
+            app.render('game/player/results', {
+              layout: false,
+              answers: formattedAnswers,
+              totalCorrect: totalCorrect,
+              totalQuestions: questions.length
+            }, function (err, html) {
+              if (err) {
+                console.log(err);
+              }
+              nsp.to(team.socketId).emit('page', {
+                html: html
+              });
+            });
+          }
+        );
+      }
     }
   };
 
