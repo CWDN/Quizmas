@@ -113,10 +113,10 @@ Game.getByName = function (name, callback) {
   });
 };
 
-Game.prototype.storeTeamAnswer = function (socketId, answer, questionId, callback) {
+Game.prototype.storeTeamAnswer = function (socketId, answer, questionId, correct, callback) {
   var game = this;
   Team.getBySocketId(socketId, function (team) {
-    team.storeAnswer(questionId, answer, function () {
+    team.storeAnswer(questionId, answer, correct, function () {
       var teams = game.getTeams();
       Team.getCountAnswersForQuestionIdAndGame(questionId, game.getName(), function (count) {
         if (count === teams.length) {
