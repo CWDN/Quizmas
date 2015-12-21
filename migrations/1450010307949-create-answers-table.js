@@ -3,7 +3,7 @@
 exports.up = function (next) {
   var db = getDBConnection();
   db.serialize(function () {
-    db.run('CREATE TABLE answers (game TEXT, teamName TEXT, answer TEXT, questionId INTEGER)');
+    db.run('CREATE TABLE answers (game TEXT, teamName TEXT, answer TEXT, questionId INTEGER, correct BOOLEAN)');
   });
   db.close(function () {
     next();
